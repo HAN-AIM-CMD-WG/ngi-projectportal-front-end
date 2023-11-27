@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "../ui/switch"
 import { Project } from "./project"
-import { UserList } from "./userlist"
 import { useState } from "react"
+import { Link } from "react-router-dom"
 
 export function Landing() {
   const [adminMode, setAdminMode] = useState(false);
@@ -15,6 +15,7 @@ export function Landing() {
           <div className="flex items-center space-x-2">
            <Switch id="admin-mode" checked={adminMode} onCheckedChange={setAdminMode} />
            <Label htmlFor="admin-mode">Admin Mode</Label>
+           {adminMode ? <Link to="/admin" className="btn btn-default"><Button>Admin Dashboard</Button> </Link> : <Link to="/login" className="btn btn-default"><Button>Login</Button> </Link>}
           </div>
         </div>
         <div className="container px-4 md:px-6">
@@ -35,7 +36,7 @@ export function Landing() {
       </section>
       <section className="w-full">
         <div className="container px-4 md:px-6">
-          {adminMode ? <UserList /> : <Project />}
+          {adminMode ? "" : <Project />}
         </div>
       </section>
     </div>
