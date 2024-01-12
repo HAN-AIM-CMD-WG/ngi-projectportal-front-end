@@ -3,6 +3,7 @@ import { Landing } from './components/component/landing';
 import { AdminDashboard } from './components/component/admin-dashboard';
 import { Login } from './components/component/login';
 import { Register } from './components/component/register';
+import { NotFound } from './components/component/not-found';
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
