@@ -2,15 +2,71 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { useState } from "react"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { login } from "@/app/slices/authSlice"
 
 export function Login() {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setShowAlert(false);
+
+    try {
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
+
+      const response = await fetch('http://localhost:8080/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      });
+
+      if (!response.ok)
+      {
+        const message = `An error has occurred: ${response.status}`;
+        const data = await response.json();
+        setAlertMessage(data.error || message);
+        setShowAlert(true);
+        return;
+      }
+
+      const data = await response.json();
+      dispatch(login(data));
+      navigate('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      setAlertMessage('Login failed. Please try again.');
+      setShowAlert(true);
+    }
+  };    
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+            {showAlert && (
+        <Alert variant="destructive" className="mb-4 w-full max-w-md">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       <Card className="w-full max-w-md p-6 mx-auto mt-8 bg-white shadow-lg rounded-lg dark:bg-gray-800">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Sign in to your account</h2>
         </div>
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -19,6 +75,8 @@ export function Login() {
               placeholder="you@example.com"
               required
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -28,6 +86,8 @@ export function Login() {
               id="password"
               required
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <div className="flex justify-between items-center">
@@ -74,7 +134,6 @@ export function Login() {
   )
 }
 
-
 function IconGoogle(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -85,9 +144,9 @@ function IconGoogle(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="4" />
@@ -97,7 +156,6 @@ function IconGoogle(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
-
 
 function IconSchool(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -109,9 +167,9 @@ function IconSchool(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="m4 6 8-4 8 4" />
       <path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2" />
@@ -123,7 +181,6 @@ function IconSchool(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-
 function IconGitHub(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -134,9 +191,9 @@ function IconGitHub(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth ="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
       <path d="M9 18c-4.51 2-5-2-7-2" />
