@@ -3,8 +3,30 @@ import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar"
 import { SelectValue, SelectTrigger, SelectLabel, SelectItem, SelectGroup, SelectContent, Select } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 
 export function AdminDashboard() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const getUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/person", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        const data = await response.json();
+        setUsers(data);
+      } catch(error){
+        console.error("Failed to get users:", error);
+      }
+    };
+    getUsers();
+  }, []); 
+
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-zinc-100/40 lg:block dark:bg-zinc-800/40">
@@ -47,99 +69,39 @@ export function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>
+                {users.map((user, index) =>(
+                  <TableRow key={index}>
                     <Avatar className="h-9 w-9">
                       <AvatarImage alt="User1" src="/placeholder-avatar.jpg" />
-                      <AvatarFallback>U1</AvatarFallback>
+                      <AvatarFallback>U{index+1}</AvatarFallback>
                     </Avatar>
-                  </TableCell>
-                  <TableCell className="font-medium">User 1</TableCell>
-                  <TableCell>user1@example.com</TableCell>
-                  <TableCell>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue>Opdrachtgever</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Status</SelectLabel>
-                          <SelectItem value="Opdrachtgever">Opdrachtgever</SelectItem>
-                          <SelectItem value="Deelnemer">Deelnemer</SelectItem>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
+                    <TableCell>
+                      <span className="font-medium">{user.name}</span>
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue>{user.status}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Status</SelectLabel>
+                            <SelectItem value="Opdrachtgever">Opdrachtgever</SelectItem>
+                            <SelectItem value="Deelnemer">Deelnemer</SelectItem>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
                     <Button size="icon" variant="ghost">
                       <IconTrash className="w-4 h-4" />
                       <span className="sr-only">Delete User</span>
                     </Button>
                   </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage alt="User2" src="/placeholder-avatar.jpg" />
-                      <AvatarFallback>U2</AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-                  <TableCell className="font-medium">User 2</TableCell>
-                  <TableCell>user2@example.com</TableCell>
-                  <TableCell>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue>Deelnemer</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Status</SelectLabel>
-                          <SelectItem value="Opdrachtgever">Opdrachtgever</SelectItem>
-                          <SelectItem value="Deelnemer">Deelnemer</SelectItem>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="icon" variant="ghost">
-                      <IconTrash className="w-4 h-4" />
-                      <span className="sr-only">Delete User</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage alt="User3" src="/placeholder-avatar.jpg" />
-                      <AvatarFallback>U3</AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-                  <TableCell className="font-medium">User 3</TableCell>
-                  <TableCell>user3@example.com</TableCell>
-                  <TableCell>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue>Admin</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Status</SelectLabel>
-                          <SelectItem value="Opdrachtgever">Opdrachtgever</SelectItem>
-                          <SelectItem value="Deelnemer">Deelnemer</SelectItem>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="icon" variant="ghost">
-                      <IconTrash className="w-4 h-4" />
-                      <span className="sr-only">Delete User</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>

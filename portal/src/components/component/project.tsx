@@ -6,6 +6,7 @@ import { useState } from "react";
 
 export function Project() {
   const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
 
   const createProject = async () => {
     try {
@@ -16,7 +17,7 @@ export function Project() {
         },
         body: JSON.stringify({
           title: projectName,
-          description: "test",
+          description: description,
         }),
       });
 
@@ -41,6 +42,12 @@ export function Project() {
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
           />
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            />
         </div>
       </CardContent>
       <CardFooter>
