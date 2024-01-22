@@ -12,7 +12,6 @@ import { useDispatch } from 'react-redux';
 
 const App = () => {
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function AuthRouteWrapper({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const dispatch = useDispatch();
@@ -20,7 +19,8 @@ const App = () => {
     useEffect(() => {
       const verifyAuth = async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/checkAuth', {
+          const response = await fetch('/api/authentication', {
+            method: 'GET',
             credentials: 'include',
           });
           if (response.ok) {
@@ -52,7 +52,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AuthRouteWrapper><AdminDashboard /></AuthRouteWrapper>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />

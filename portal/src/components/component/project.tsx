@@ -10,8 +10,9 @@ export function Project() {
 
   const createProject = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/project/create/w.nordsiek@han.nl", {
+      const response = await fetch("/api/project/create/w.nordsiek@han.nl", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

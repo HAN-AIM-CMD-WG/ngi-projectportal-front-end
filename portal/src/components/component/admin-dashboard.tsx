@@ -1,18 +1,27 @@
 import { Link } from "react-router-dom"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar"
-import { SelectValue, SelectTrigger, SelectLabel, SelectItem, SelectGroup, SelectContent, Select } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Navbar } from "./navbar"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 
 export function AdminDashboard() {
-  const [users, setUsers] = useState([]);
+
+  interface User {
+    name: string;
+    email: string;
+    status: [string];
+  }
+
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/person", {
+        const response = await fetch("/api/person", {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -28,9 +37,14 @@ export function AdminDashboard() {
   }, []); 
 
   return (
+    <div className="">
+          <Navbar />
+
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-zinc-100/40 lg:block dark:bg-zinc-800/40">
+        
         <div className="flex h-full max-h-screen flex-col gap-2">
+          
           <div className="flex h-[60px] items-center border-b px-6">
             <Link className="flex items-center gap-2 font-semibold" to="#">
               <IconPackage2 className="h-6 w-6" />
@@ -80,21 +94,13 @@ export function AdminDashboard() {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue>{user.status}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Status</SelectLabel>
-                            <SelectItem value="Opdrachtgever">Opdrachtgever</SelectItem>
-                            <SelectItem value="Deelnemer">Deelnemer</SelectItem>
-                            <SelectItem value="Admin">Admin</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                    <Badge className="px-2 py-1 rounded-full bg-green-500 text-white">Opdrachtgever</Badge>
                     </TableCell>
                     <TableCell>
+                    <Button size="icon" variant="ghost">
+                      <FileEditIcon className="w-4 h-4" />
+                      <span className="sr-only">Change Status</span>
+                    </Button>
                     <Button size="icon" variant="ghost">
                       <IconTrash className="w-4 h-4" />
                       <span className="sr-only">Delete User</span>
@@ -111,6 +117,7 @@ export function AdminDashboard() {
         </main>
       </div>
     </div>
+  </div>
   )
 }
 
@@ -135,6 +142,26 @@ function IconPackage2(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+function FileEditIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z" />
+    </svg>
+  )
+}
 
 function IconTrash(props: React.SVGProps<SVGSVGElement>) {
   return (

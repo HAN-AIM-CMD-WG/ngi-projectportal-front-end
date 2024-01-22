@@ -27,7 +27,7 @@ export function Login() {
       params.append('username', email);
       params.append('password', password);
 
-      const response = await fetch('http://localhost:8080/api/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
