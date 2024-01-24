@@ -3,14 +3,18 @@ import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card }
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export function Project() {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
+  const userRoles = useSelector((state: any) => state.auth.user?.roles);
+  const email = useSelector((state: any) => state.auth.user?.email);
 
   const createProject = async () => {
     try {
-      const response = await fetch("/api/project/create/w.nordsiek@han.nl", {
+      const response = await fetch(`/api/project/create/${email}`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -30,7 +34,9 @@ export function Project() {
   };
 
   return (
-    <Card>
+    <div>
+        {isLoggedIn && userRoles?.includes('OPDRACHTGEVER') && (
+      <Card>
       <CardHeader>
         <CardTitle>Create a New Project</CardTitle>
         <CardDescription>Fill out the form below to start a new project.</CardDescription>
@@ -60,5 +66,8 @@ export function Project() {
         </Button>
       </CardFooter>
     </Card>
-  );
-}
+        )}
+    </div>
+      );
+      
+    }

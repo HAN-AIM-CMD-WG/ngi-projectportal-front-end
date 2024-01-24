@@ -29,7 +29,7 @@ export function Navbar() {
 
   return (
     <header className="flex justify-between items-center h-16 px-4 bg-white dark:bg-gray-800 shadow-md">
-      <Link className="text-2xl font-semibold text-gray-900 dark:text-gray-200" to="#">
+      <Link className="text-2xl font-semibold text-gray-900 dark:text-gray-200" to="/">
         Projojo
       </Link>
       <div className="flex items-center gap-4">
