@@ -5,16 +5,28 @@ import { Badge } from "@/components/ui/badge"
 import { Navbar } from "./navbar"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
+import { Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger, 
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 export function AdminDashboard() {
 
-  interface User {
+  type User = {
     name: string;
     email: string;
     status: [string];
   }
 
   const [users, setUsers] = useState<User[]>([]);
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     const getUsers = async () => {
@@ -35,6 +47,28 @@ export function AdminDashboard() {
     };
     getUsers();
   }, []); 
+
+  const createUser = async () => {
+    try {
+      const response = await fetch('/api/person/createUnverified', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullname,
+          email: email,
+          status: [],
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('User created:', data);
+    } catch (error) {
+      console.error('Failed to create user:', error);
+    }
+  };
 
   return (
     <div className="">
@@ -85,7 +119,7 @@ export function AdminDashboard() {
               <TableBody>
                 {users.map((user, index) =>(
                   <TableRow key={index}>
-                    <Avatar className="h-9 w-9">
+                    <Avatar className="w-[80px] h-9">
                       <AvatarImage alt="User1" src="/placeholder-avatar.jpg" />
                       <AvatarFallback>U{index+1}</AvatarFallback>
                     </Avatar>
@@ -94,7 +128,9 @@ export function AdminDashboard() {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                    <Badge className="px-2 py-1 rounded-full bg-green-500 text-white">Opdrachtgever</Badge>
+                      {user.status.map((status) => (
+                        <Badge className="px-2 py-1 mx-1 rounded-full bg-green-500 text-white">{status}</Badge>
+                      ))}
                     </TableCell>
                     <TableCell>
                     <Button size="icon" variant="ghost">
@@ -111,9 +147,48 @@ export function AdminDashboard() {
               </TableBody>
             </Table>
           </div>
-          <Button className="ml-auto" size="sm">
-            Add User
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <Button className="ml-auto" size="sm">
+                Add User
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add user</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="fullname" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="fullname"
+              value={fullname}
+              className="col-span-3"
+              onChange={(e) => setFullname(e.target.value)}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="email" className="text-right">
+              Email
+            </Label>
+            <Input
+              id="email"
+              value={email}
+              className="col-span-3"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" onClick={createUser}>Send email</Button>
+        </DialogFooter>
+      </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
