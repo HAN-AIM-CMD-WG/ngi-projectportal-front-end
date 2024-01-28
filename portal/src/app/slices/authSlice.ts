@@ -1,25 +1,172 @@
-import { createSlice } from '@reduxjs/toolkit';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
+interface AuthState {
+  email: string | null;
+  roles: string[];
+  isLoading: boolean;
+  authChecking: boolean;
+  error: string | null;
+  isLoggedIn: boolean;
+}
+
+const initialState: AuthState = {
+  email: null,
+  roles: [],
+  isLoading: false,
+  authChecking: true,
+  error: null,
   isLoggedIn: false,
-  user: null,
 };
+
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (credentials: { email: string, password: string }, { rejectWithValue }) => {
+    try {
+      const { email, password } = credentials;
+
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+export const logoutUser = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (response.ok) {
+        return true;
+      } else {
+        console.error('Logout failed:', response.statusText);
+        return rejectWithValue('Logout failed');
+      }
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+export const checkAuthentication = createAsyncThunk(
+  'auth/checkAuthentication',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/authentication', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        return rejectWithValue('Authentication check failed');
+      }
+    } catch (error: any) {
+      console.error('Auth check failed:', error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    login: (state, action) => {
+    setSessionActive: (state, action: PayloadAction<string>) => {
       state.isLoggedIn = true;
-      state.user = action.payload;
-      console.log('login', state.user);
+      state.email = action.payload;
+      state.authChecking = false;
     },
-    logout: (state) => {
+    setSessionInactive: (state) => {
       state.isLoggedIn = false;
-      state.user = null;
+      state.email = null;
+      state.authChecking = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        console.log('Login fulfilled:', action.payload);
+        state.email = action.payload.email;
+        state.roles = action.payload.roles;
+        state.isLoggedIn = true;
+        state.isLoading = false;
+        state.authChecking = false;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.authChecking = false;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoggedIn = false;
+        state.email = null;
+        state.isLoading = false;
+        state.authChecking = false;
+        state.error = null;
+        state.roles = [];
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.authChecking = false;
+      })
+      .addCase(checkAuthentication.pending, (state) => {
+        console.log('Auth check pending');
+        state.isLoading = true;
+        state.authChecking = true;
+      })
+      .addCase(checkAuthentication.fulfilled, (state, action) => {
+        console.log('Auth check fulfilled:', action.payload); 
+        state.isLoading = false;
+        state.authChecking = false;
+        state.isLoggedIn = true;
+        state.email = action.payload.email;
+        state.roles = action.payload.roles;
+      })
+      .addCase(checkAuthentication.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.authChecking = false;
+        state.isLoggedIn = false;
+        state.email = null;
+        state.roles = [];
+      });
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { setSessionActive, setSessionInactive } = authSlice.actions;
 export default authSlice.reducer;
