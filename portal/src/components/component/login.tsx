@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -6,10 +7,9 @@ import { useState } from "react"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
-import { login } from "@/app/slices/authSlice"
+import { loginUser } from "@/app/slices/authSlice"
 
 export function Login() {
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
@@ -18,41 +18,21 @@ export function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setShowAlert(false);
 
-    try {
-      const params = new URLSearchParams();
-      params.append('username', email);
-      params.append('password', password);
-
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString(),
-      });
-
-      if (!response.ok)
-      {
-        const message = `An error has occurred: ${response.status}`;
-        const data = await response.json();
-        setAlertMessage(data.error || message);
+    dispatch(loginUser({ email, password }) as any)
+      .unwrap()
+      .then(() => {
+        navigate('/');
+      })
+      .catch((error: any) => {
+        console.error('Login error:', error);
+        setAlertMessage('Login failed. Please try again.');
         setShowAlert(true);
-        return;
-      }
-
-      const data = await response.json();
-      dispatch(login(data));
-      navigate('/');
-    } catch (error) {
-      console.error('Login error:', error);
-      setAlertMessage('Login failed. Please try again.');
-      setShowAlert(true);
-    }
-  };    
+      });
+  };   
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">

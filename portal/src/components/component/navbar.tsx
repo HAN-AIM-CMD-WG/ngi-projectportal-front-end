@@ -2,30 +2,25 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useSelector } from "react-redux"
-import { logout } from "@/app/slices/authSlice"
 import { useDispatch } from "react-redux"
+import { logoutUser } from "@/app/slices/authSlice"
 
 export function Navbar() {
 
   const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-  const userRoles = useSelector((state: any) => state.auth.user?.roles);
+  const userRoles = useSelector((state: any) => state.auth.roles);
   const dispatch = useDispatch();
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/logout', {
-        method: 'POST',
-        credentials: 'include',
+  const handleLogout = () => {
+    dispatch(logoutUser() as any)
+      .unwrap()
+      .then(() => {
+        console.log('Logged out successfully');
+      })
+      .catch((error: any) => {
+        console.error('Logout error:', error);
       });
-      if (response.ok) {
-        dispatch(logout());
-      } else {
-        console.error('Logout failed:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  }
 
   return (
     <header className="flex justify-between items-center h-16 px-4 bg-white dark:bg-gray-800 shadow-md">
