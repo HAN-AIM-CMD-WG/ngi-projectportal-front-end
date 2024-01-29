@@ -11,6 +11,8 @@ interface Project {
 export function ProjectList() {
   const email = useSelector((state: any) => state.auth.email);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const getProjects = async () => {
@@ -27,16 +29,31 @@ export function ProjectList() {
           throw new Error('Failed to fetch projects');
         }
 
+        console.log(response.status);
+
         const data = await response.json();
-        console.log("Projects:", data);
         setProjects(data);
-      } catch (error) {
-        console.error("Failed to get projects:", error);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     getProjects();
-  }, []);
+  }, [email]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (projects.length === 0) {
+    return <div>No projects found.</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -63,5 +80,5 @@ export function ProjectList() {
         </div>
       </div>
     </div>
-  )
+  );
 }
