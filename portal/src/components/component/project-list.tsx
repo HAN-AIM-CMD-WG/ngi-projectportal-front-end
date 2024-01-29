@@ -3,38 +3,40 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
 
+interface Project {
+  title: string;
+  description: string;
+}
 
 export function ProjectList() {
   const email = useSelector((state: any) => state.auth.email);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-      const getProjects = async () => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/project/${email}`, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+    const getProjects = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/project/${email}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch projects');
-          }
-
-          const data = await response.json();
-          console.log("Projects:", data);
-          setProjects(data);
-        } catch (error) {
-          console.error("Failed to get projects:", error);
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
         }
-      };
 
-      getProjects();
+        const data = await response.json();
+        console.log("Projects:", data);
+        setProjects(data);
+      } catch (error) {
+        console.error("Failed to get projects:", error);
+      }
+    };
+
+    getProjects();
   }, []);
-
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -46,39 +48,18 @@ export function ProjectList() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Project 1</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm/relaxed">
-                This is a description of the project. It should be a few sentences long and give a brief overview of the
-                project.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Project 2</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm/relaxed">
-                This is a description of the project. It should be a few sentences long and give a brief overview of the
-                project.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Project 3</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm/relaxed">
-                This is a description of the project. It should be a few sentences long and give a brief overview of the
-                project.
-              </p>
-            </CardContent>
-          </Card>
+          {projects.map((project, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle>{project.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm/relaxed">
+                  {project.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
