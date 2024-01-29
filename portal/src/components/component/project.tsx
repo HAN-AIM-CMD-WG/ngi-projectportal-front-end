@@ -29,6 +29,9 @@ export function Project() {
       console.log("Project created:", data);
     } catch (error) {
       console.error("Failed to create project:", error);
+    } finally {
+      setProjectName("");
+      setDescription("");
     }
   };
 
