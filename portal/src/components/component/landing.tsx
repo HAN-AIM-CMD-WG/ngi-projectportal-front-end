@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button"
 import { Project } from "./project"
 import { Navbar } from "./navbar"
 import { ProjectList } from "./project-list.tsx"
+import { useSelector } from "react-redux";
 
 export function Landing() {
+
+  const roles = useSelector((state: any) => state.auth.roles);
 
   return (
     <div key="1">
@@ -25,16 +29,20 @@ export function Landing() {
           </div>
         </div>
       </section>
-      <section className="w-full py-6">
-        <div className="container px-4 md:px-6">
-          <Project />
-        </div>
-      </section>
-      <section className="w-full py-6">
-        <div className="container px-4 md:px-6">
-          <ProjectList />
-        </div>
-      </section>
+      {roles.includes('ROLE_OPDRACHTGEVER') && (
+        <>
+          <section className="w-full py-6">
+            <div className="container px-4 md:px-6">
+              <Project />
+            </div>
+          </section>
+          <section className="w-full py-6">
+            <div className="container px-4 md:px-6">
+              <ProjectList />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

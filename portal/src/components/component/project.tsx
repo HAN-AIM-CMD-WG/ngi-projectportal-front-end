@@ -1,16 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from "@/components/ui/input";
 import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export function Project() {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+  const email = useSelector((state: any) => state.auth.email);
 
   const createProject = async () => {
     try {
-      const response = await fetch("/api/project/create/w.nordsiek@han.nl", {
+      const response = await fetch(`http://localhost:8080/api/project/create/${email}`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -26,6 +29,9 @@ export function Project() {
       console.log("Project created:", data);
     } catch (error) {
       console.error("Failed to create project:", error);
+    } finally {
+      setProjectName("");
+      setDescription("");
     }
   };
 
