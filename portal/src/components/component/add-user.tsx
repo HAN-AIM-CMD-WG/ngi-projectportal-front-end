@@ -6,42 +6,66 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useState } from "react";
 
 export function AddUser() {
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isDialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
 
+  const openDialog = () => setDialogOpen(true);
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setFullname("");
+    setEmail("");
+    setErrorMessage("");
+    setShowAlert(false);
+  };
+
+  const checkEmail = (email: string) => {
+    return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
+  };
   const createUser = async () => {
+    setShowAlert(false);
     try {
-      const response = await fetch("/api/person/createUnverified", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: fullname,
-          email: email,
-          status: [],
-        }),
-      });
+      if (checkEmail(email)) {
+        const response = await fetch("/api/person/createUnverified", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fullname,
+            email: email,
+            status: [],
+          }),
+        });
 
-      const data = await response.json();
-      console.log("User created:", data);
+        const data = await response.json();
+        console.log("User created:", data);
+        closeDialog();
+      } else {
+        setErrorMessage("Please enter a valid email address.");
+        setShowAlert(true);
+      }
     } catch (error) {
-      setErrorMessage("Failed to create user");
+      setErrorMessage(
+        "Failed to create user because emailaddress already exists in the database."
+      );
+      setShowAlert(true);
       console.error("Failed to create user:", error);
     }
   };
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>
         <Button className="ml-auto" size="sm">
           Add User
@@ -78,17 +102,25 @@ export function AddUser() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+          {showAlert && (
+            <Alert
+              variant="destructive"
+              className="mb-4 w-full max-w-md border-none"
+            >
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
         </div>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              type="submit"
-              onClick={createUser}
-              disabled={!email || !fullname}
-            >
-              Send email
-            </Button>
-          </DialogClose>
+          <Button onClick={closeDialog}>Cancel</Button>
+          <Button
+            type="submit"
+            onClick={createUser}
+            disabled={!email || !fullname}
+          >
+            Send email
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
