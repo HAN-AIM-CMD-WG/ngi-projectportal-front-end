@@ -10,7 +10,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -23,20 +23,44 @@ import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 
 export function EditUser({
   user,
+  availableStatus,
 }: {
   user: { name: string; email: string; status: [string] };
+  availableStatus: { name: string }[];
 }) {
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState([""]);
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [status, setStatus] = useState(user.status);
 
   const closeDialog = () => {
-    setUserName(user.name);
+    setName(user.name);
     setEmail(user.email);
     setStatus(user.status);
     setDialogOpen(false);
   };
+
+  const editUser = async () => {
+    try {
+      const response = await fetch("/api/person", {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          status: status,
+        }),
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Failed to edit user:", error);
+    }
+  };
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>
@@ -60,9 +84,9 @@ export function EditUser({
             <Input
               id="fullname"
               type="text"
-              value={userName}
+              value={name}
               onChange={(e) => {
-                setUserName(e.target.value);
+                setName(e.target.value);
               }}
             />
           </div>
@@ -94,7 +118,9 @@ export function EditUser({
           <Button variant="secondary" onClick={closeDialog}>
             Cancel
           </Button>
-          <Button onClick={() => {}}>Save</Button>
+          <Button type="submit" onClick={editUser}>
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -22,8 +22,11 @@ export function AdminDashboard() {
     status: [string];
   };
 
+  type Status = {
+    name: string;
+  };
   const [users, setUsers] = useState<User[]>([]);
-
+  const [availableStatus, setAvailableStatus] = useState<Status[]>([]);
   useEffect(() => {
     const getUsers = async () => {
       try {
@@ -41,6 +44,24 @@ export function AdminDashboard() {
         console.error("Failed to get users:", error);
       }
     };
+
+    const getStatus = async () => {
+      try {
+        const response = await fetch("/api/status", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        console.log(data);
+        setAvailableStatus(data);
+      } catch (error) {
+        console.error("Failed to get status:", error);
+      }
+    };
+    getStatus();
     getUsers();
   }, []);
 
@@ -110,7 +131,10 @@ export function AdminDashboard() {
                         ))}
                       </TableCell>
                       <TableCell>
-                        <EditUser user={user} />
+                        <EditUser
+                          user={user}
+                          availableStatus={availableStatus}
+                        />
                         <Button size="icon" variant="ghost">
                           <IconTrash className="w-4 h-4" />
                           <span className="sr-only">Delete User</span>
