@@ -18,9 +18,8 @@ export function AddUser() {
   const [email, setEmail] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
-  const openDialog = () => setDialogOpen(true);
   const closeDialog = () => {
     setDialogOpen(false);
     setFullname("");
