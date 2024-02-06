@@ -19,7 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 
 export function EditUser({
   user,
@@ -38,6 +37,11 @@ export function EditUser({
     setEmail(user.email);
     setStatus(user.status);
     setDialogOpen(false);
+  };
+
+  const addStatus = (extraStatus: string) => {
+    status.push(extraStatus);
+    console.log(status);
   };
 
   const editUser = async () => {
@@ -103,7 +107,33 @@ export function EditUser({
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="status">Status</Label>
-
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button size="sm" variant="ghost">
+                  <span className="text-gray-400">Select status</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent sideOffset={5}>
+                {availableStatus.map((availableStatus) => (
+                  <DropdownMenuCheckboxItem
+                    key={availableStatus.name}
+                    value={availableStatus.name}
+                    checked={status.includes(availableStatus.name)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        addStatus(availableStatus.name);
+                      } else {
+                        setStatus(
+                          status.filter((s) => s !== availableStatus.name)
+                        );
+                      }
+                    }}
+                  >
+                    <DropdownMenuLabel>{status.name}</DropdownMenuLabel>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Input
               id="status"
               type="text"
