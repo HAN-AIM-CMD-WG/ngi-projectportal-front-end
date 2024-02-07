@@ -19,6 +19,7 @@ export function AdminDashboard() {
   type User = {
     name: string;
     email: string;
+    password: string;
     status: [string];
   };
 
@@ -63,7 +64,7 @@ export function AdminDashboard() {
     };
     getStatus();
     getUsers();
-  }, []);
+  }, [users]);
 
   return (
     <div className="">

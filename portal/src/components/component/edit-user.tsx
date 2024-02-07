@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -30,7 +30,9 @@ export function EditUser({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
-  const [status, setStatus] = useState(user.status);
+  const [userStatus, setStatus] = useState<string[]>(user.status);
+
+  useEffect(() => {}, [userStatus]);
 
   const closeDialog = () => {
     setName(user.name);
@@ -39,15 +41,10 @@ export function EditUser({
     setDialogOpen(false);
   };
 
-  const addStatus = (extraStatus: string) => {
-    status.push(extraStatus);
-    console.log(status);
-  };
-
   const editUser = async () => {
     try {
-      const response = await fetch("/api/person", {
-        method: "PUT",
+      const response = await fetch(`/api/person/${user.email}`, {
+        method: "PATCH",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -55,10 +52,11 @@ export function EditUser({
         body: JSON.stringify({
           name: name,
           email: email,
-          status: status,
+          status: userStatus,
         }),
       });
       const data = await response.json();
+      closeDialog();
       console.log(data);
     } catch (error) {
       console.error("Failed to edit user:", error);
@@ -113,35 +111,26 @@ export function EditUser({
                   <span className="text-gray-400">Select status</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent sideOffset={5}>
-                {availableStatus.map((availableStatus) => (
+              <DropdownMenuContent className="w-56">
+                {availableStatus.map((dropdownStatus) => (
                   <DropdownMenuCheckboxItem
-                    key={availableStatus.name}
-                    value={availableStatus.name}
-                    checked={status.includes(availableStatus.name)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        addStatus(availableStatus.name);
-                      } else {
-                        setStatus(
-                          status.filter((s) => s !== availableStatus.name)
-                        );
-                      }
+                    key={dropdownStatus.name}
+                    checked={userStatus.includes(dropdownStatus.name)}
+                    onCheckedChange={() => {
+                      setStatus((prevStatus: string[]) =>
+                        prevStatus.includes(dropdownStatus.name)
+                          ? prevStatus.filter(
+                              (status) => status !== dropdownStatus.name
+                            )
+                          : [...prevStatus, dropdownStatus.name]
+                      );
                     }}
                   >
-                    <DropdownMenuLabel>{status.name}</DropdownMenuLabel>
+                    <DropdownMenuLabel>{dropdownStatus.name}</DropdownMenuLabel>
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Input
-              id="status"
-              type="text"
-              value={status}
-              onChange={(e) => {
-                setStatus([e.target.value]);
-              }}
-            />
           </div>
         </div>
         <DialogFooter>
