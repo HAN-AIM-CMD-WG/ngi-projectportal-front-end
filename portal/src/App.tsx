@@ -24,6 +24,7 @@ const App = () => {
   }, [dispatch]);
 
   function AuthRouteWrapper({ children }: { children: ReactNode }) {
+    console.log('AuthRouteWrapper: userRoles:', userRoles);
     if (authChecking) {
       return <Loading />;
     }
