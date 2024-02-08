@@ -7,7 +7,8 @@ import { useState } from "react"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
-import { loginUser } from "@/app/slices/authSlice"
+import { loginUser, loginWithGoogle as loginWithGoogleThunk } from "@/app/slices/authSlice";
+import { useGoogleLogin } from '@react-oauth/google';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -32,7 +33,28 @@ export function Login() {
         setAlertMessage('Login failed. Please try again.');
         setShowAlert(true);
       });
-  };   
+  };
+
+  const handleGoogleSuccess = (credentialResponse: any) => {
+    dispatch(loginWithGoogleThunk(credentialResponse.access_token) as any)
+      .unwrap()
+      .then(() => navigate('/'))
+      .catch((error: any) => {
+        console.error('Google login error:', error);
+        setAlertMessage('Google Login failed. Please try again.');
+        setShowAlert(true);
+      });
+  };
+
+  
+  const signInWithGoogle = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: (error: any) => {
+      console.error('Google Login Error:', error);
+      setAlertMessage('Google Login failed. Please try again.');
+      setShowAlert(true);
+    },
+  });
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -93,7 +115,11 @@ export function Login() {
           </div>
           <div className="mt-6 grid grid-cols-3 gap-3">
             <div>
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" variant="outline"
+                onClick={(event) => {
+                  event.preventDefault();
+                  signInWithGoogle();
+                }}>
                 <IconGoogle className="h-5 w-5" />
               </Button>
             </div>
