@@ -64,7 +64,7 @@ export function AdminDashboard() {
     };
     getStatus();
     getUsers();
-  }, [users]);
+  }, []);
 
   return (
     <div className="">
