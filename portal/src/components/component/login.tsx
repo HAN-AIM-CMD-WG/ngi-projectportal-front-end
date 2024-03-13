@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -6,9 +5,9 @@ import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom"
-import { useDispatch } from "react-redux"
 import { loginUser, loginWithGoogle as loginWithGoogleThunk } from "@/app/slices/authSlice";
 import { useGoogleLogin } from '@react-oauth/google';
+import { useAppDispatch } from "@/app/hooks"
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -16,30 +15,33 @@ export function Login() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  interface GoogleCredentialResponse {
+    access_token: string;
+  }
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setShowAlert(false);
 
-    dispatch(loginUser({ email, password }) as any)
+    dispatch(loginUser({ email, password }))
       .unwrap()
       .then(() => {
         navigate('/');
       })
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         console.error('Login error:', error);
         setAlertMessage('Login failed. Please try again.');
         setShowAlert(true);
       });
   };
 
-  const handleGoogleSuccess = (credentialResponse: any) => {
-    dispatch(loginWithGoogleThunk(credentialResponse.access_token) as any)
-      .unwrap()
+  const handleGoogleSuccess = (credentialResponse: GoogleCredentialResponse) => {
+    dispatch(loginWithGoogleThunk(credentialResponse.access_token))
       .then(() => navigate('/'))
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         console.error('Google login error:', error);
         setAlertMessage('Google Login failed. Please try again.');
         setShowAlert(true);
@@ -49,7 +51,7 @@ export function Login() {
   
   const signInWithGoogle = useGoogleLogin({
     onSuccess: handleGoogleSuccess,
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Google Login Error:', error);
       setAlertMessage('Google Login failed. Please try again.');
       setShowAlert(true);

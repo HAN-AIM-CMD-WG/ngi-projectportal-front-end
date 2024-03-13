@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
@@ -43,8 +42,12 @@ export const loginUser = createAsyncThunk(
 
       const data = await response.json();
       return data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
     }
   }
 );
@@ -67,8 +70,12 @@ export const loginWithGoogle = createAsyncThunk(
 
       const data = await response.json();
       return data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
     }
   }
 );
@@ -87,9 +94,12 @@ export const logoutUser = createAsyncThunk(
         console.error('Logout failed:', response.statusText);
         return rejectWithValue('Logout failed');
       }
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
     }
   }
 );
@@ -108,9 +118,12 @@ export const checkAuthentication = createAsyncThunk(
       } else {
         return rejectWithValue('Authentication check failed');
       }
-    } catch (error: any) {
-      console.error('Auth check failed:', error);
-      return rejectWithValue(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
     }
   }
 );
@@ -137,7 +150,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log('Login fulfilled:', action.payload);
         state.email = action.payload.email;
         state.roles = action.payload.roles;
         state.isLoggedIn = true;
@@ -167,12 +179,10 @@ const authSlice = createSlice({
         state.authChecking = false;
       })
       .addCase(checkAuthentication.pending, (state) => {
-        console.log('Auth check pending');
         state.isLoading = true;
         state.authChecking = true;
       })
       .addCase(checkAuthentication.fulfilled, (state, action) => {
-        console.log('Auth check fulfilled:', action.payload); 
         state.isLoading = false;
         state.authChecking = false;
         state.isLoggedIn = true;

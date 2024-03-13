@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button"
 import { Project } from "./project"
 import { Navbar } from "./navbar"
 import { ProjectList } from "./project-list.tsx"
-import { useSelector } from "react-redux";
+import { useAppSelector } from "@/app/hooks.ts";
 
 export function Landing() {
 
-  const roles = useSelector((state: any) => state.auth.roles);
+  const roles = useAppSelector((state) => state.auth.roles);
 
   return (
     <div key="1">

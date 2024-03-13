@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
+import { useEffect } from "react";
+import { fetchProjects } from "@/app/slices/projectSlice"; 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
 interface Project {
   title: string;
@@ -9,41 +9,15 @@ interface Project {
 }
 
 export function ProjectList() {
-  const email = useSelector((state: any) => state.auth.email);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const dispatch = useAppDispatch();
+  const { email } = useAppSelector((state) => state.auth);
+  const { projects, fetchStatus, error } = useAppSelector((state) => state.project);
 
   useEffect(() => {
-    const getProjects = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/api/project/${email}`, {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+    if(email) dispatch(fetchProjects(email));
+  }, [dispatch, email]);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch projects');
-        }
-
-        console.log(response.status);
-
-        const data = await response.json();
-        setProjects(data);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getProjects();
-  }, [email]);
-
-  if (loading) {
+  if (fetchStatus === 'loading') {
     return <div>Loading...</div>;
   }
 
@@ -65,7 +39,7 @@ export function ProjectList() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project, index) => (
+          {projects.map((project: Project, index: number) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle>{project.title}</CardTitle>

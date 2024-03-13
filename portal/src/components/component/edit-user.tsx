@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Cross1Icon } from "@radix-ui/react-icons";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,20 +19,33 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { editUser } from "@/app/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchStatuses } from "@/app/slices/userSlice";
 
-export function EditUser({
-  user,
-  availableStatus,
-}: {
-  user: { name: string; email: string; status: [string] };
-  availableStatus: { name: string }[];
-}) {
+export function EditUser({user} : {user: any}) {
+  const dispatch = useDispatch();
+
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [userStatus, setStatus] = useState<string[]>(user.status);
+  const { availableStatus } = useSelector((state: any) => state.users);
+  const updatedUser = useSelector((state: { users: { users: any[]; }; }) => state.users.users.find((u: { email: string; }) => u.email === user.email));
+  const selectedStatusText = userStatus.length > 0 ? userStatus.join(', ') : 'Select status';
 
-  useEffect(() => {}, [userStatus]);
+  useEffect(() => {
+    if(!availableStatus) dispatch(fetchStatuses() as any);
+  }, [availableStatus, dispatch]);
+  
+  useEffect(() => {
+    if (updatedUser) {
+      setName(updatedUser.name);
+      setEmail(updatedUser.email);
+      setStatus(updatedUser.status);
+    }
+  }, [updatedUser]);
+  
 
   const closeDialog = () => {
     setName(user.name);
@@ -41,31 +54,18 @@ export function EditUser({
     setDialogOpen(false);
   };
 
-  const editUser = async () => {
+  const updateUser = async () => {
     try {
-      const response = await fetch(`/api/person/${user.email}`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          status: userStatus,
-        }),
-      });
-      const data = await response.json();
+      dispatch(editUser({ email: user.email, name, status: userStatus }) as any);
       closeDialog();
-      console.log(data);
     } catch (error) {
-      console.error("Failed to edit user:", error);
+      console.error("Failed to update user:", error);
     }
-  };
+  }
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button size="icon" variant="ghost">
           <FileEditIcon className="w-4 h-4" />
         </Button>
@@ -74,14 +74,14 @@ export function EditUser({
         <DialogHeader className="flex items-center justify-between">
           <DialogTitle>Edit User</DialogTitle>
           <Button
-            className="bg-white text-gray-400 hover:text-gray-500"
+            className="material-icons bg-white text-gray-400 hover:text-gray-500"
             onClick={closeDialog}
           >
-            <Cross1Icon />
+            close
           </Button>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
             <Label htmlFor="fullname">Full name</Label>
             <Input
               id="fullname"
@@ -106,30 +106,30 @@ export function EditUser({
           <div className="flex flex-col gap-2">
             <Label htmlFor="status">Status</Label>
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button size="sm" variant="ghost">
-                  <span className="text-gray-400">Select status</span>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" className="text-left"> 
+                  <span className={userStatus.length > 0 ? "text-black" : "text-gray-400"}>
+                    {selectedStatusText}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {availableStatus.map((dropdownStatus) => (
-                  <DropdownMenuCheckboxItem
-                    key={dropdownStatus.name}
-                    checked={userStatus.includes(dropdownStatus.name)}
-                    onCheckedChange={() => {
-                      setStatus((prevStatus: string[]) =>
-                        prevStatus.includes(dropdownStatus.name)
-                          ? prevStatus.filter(
-                              (status) => status !== dropdownStatus.name
-                            )
-                          : [...prevStatus, dropdownStatus.name]
-                      );
-                    }}
-                  >
-                    <DropdownMenuLabel>{dropdownStatus.name}</DropdownMenuLabel>
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
+              <DropdownMenuContent className="w-56 bg-white shadow-md border border-gray-200">
+              {availableStatus?.map((dropdownStatus: any) => (
+                <DropdownMenuCheckboxItem
+                  key={dropdownStatus.name}
+                  checked={userStatus.includes(dropdownStatus.name)}
+                  onCheckedChange={() => {
+                    if (userStatus.includes(dropdownStatus.name)) {
+                      setStatus(prevStatus => prevStatus.filter(status => status !== dropdownStatus.name));
+                    } else {
+                      setStatus(prevStatus => [...prevStatus, dropdownStatus.name]);
+                    }
+                  }}
+                >
+                  <DropdownMenuLabel>{dropdownStatus.name}</DropdownMenuLabel>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function EditUser({
           <Button variant="secondary" onClick={closeDialog}>
             Cancel
           </Button>
-          <Button type="submit" onClick={editUser}>
+          <Button type="submit" onClick={updateUser}>
             Save
           </Button>
         </DialogFooter>

@@ -12,8 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
+import { createUser } from '@/app/slices/userSlice';
+import { useAppDispatch } from "@/app/hooks";
 
 export function AddUser() {
+  const dispatch = useAppDispatch();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [showAlert, setShowAlert] = useState(false);
@@ -28,44 +31,27 @@ export function AddUser() {
     setShowAlert(false);
   };
 
-  const checkEmail = (email: string) => {
-    return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
-  };
-  const createUser = async () => {
-    setShowAlert(false);
-    try {
-      if (checkEmail(email)) {
-        const response = await fetch("/api/person/createUnverified", {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: fullname,
-            email: email,
-            status: [],
-          }),
-        });
+  const checkEmail = (email: string) => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email);
 
-        const data = await response.json();
-        console.log("User created:", data);
-        closeDialog();
-      } else {
-        setErrorMessage("Please enter a valid email address.");
-        setShowAlert(true);
-      }
-    } catch (error) {
-      setErrorMessage(
-        "Failed to create user because emailaddress already exists in the database."
-      );
+  const handleCreateUser = async () => {
+    setShowAlert(false);
+    if (checkEmail(email)) {
+      dispatch(createUser({ name: fullname, email }))
+        .unwrap()
+        .then(() => closeDialog())
+        .catch(() => {
+          setErrorMessage("Failed to create user. Please try again.");
+          setShowAlert(true);
+        });
+    } else {
+      setErrorMessage("Please enter a valid email address.");
       setShowAlert(true);
-      console.error("Failed to create user:", error);
     }
   };
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button className="ml-auto" size="sm">
           Add User
         </Button>
@@ -115,7 +101,7 @@ export function AddUser() {
           <Button onClick={closeDialog}>Cancel</Button>
           <Button
             type="submit"
-            onClick={createUser}
+            onClick={handleCreateUser}
             disabled={!email || !fullname}
           >
             Send email

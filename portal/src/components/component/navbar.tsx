@@ -1,23 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { useSelector } from "react-redux"
-import { useDispatch } from "react-redux"
 import { logoutUser } from "@/app/slices/authSlice"
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
 export function Navbar() {
 
-  const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
-  const userRoles = useSelector((state: any) => state.auth.roles);
-  const dispatch = useDispatch();
+  const isLoggedIn = useAppSelector((state) => state.auth.isLoggedIn);
+  const userRoles = useAppSelector((state) => state.auth.roles);
+  const dispatch = useAppDispatch();
 
   const handleLogout = () => {
-    dispatch(logoutUser() as any)
+    dispatch(logoutUser())
       .unwrap()
       .then(() => {
         console.log('Logged out successfully');
       })
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         console.error('Logout error:', error);
       });
   }

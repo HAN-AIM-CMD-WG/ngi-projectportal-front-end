@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchUsers, fetchStatuses } from '@/app/slices/userSlice';
 import {
   TableHead,
   TableRow,
@@ -11,60 +13,20 @@ import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "./navbar";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import { AddUser } from "./add-user";
 import { EditUser } from "./edit-user";
+import { User } from '@/app/types/user';
+import { Status } from '@/app/types/status';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
 export function AdminDashboard() {
-  type User = {
-    name: string;
-    email: string;
-    password: string;
-    status: [string];
-  };
+  const dispatch = useAppDispatch();
+  const { users } = useAppSelector((state) => state.users);
 
-  type Status = {
-    name: string;
-  };
-  const [users, setUsers] = useState<User[]>([]);
-  const [availableStatus, setAvailableStatus] = useState<Status[]>([]);
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await fetch("/api/person", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error("Failed to get users:", error);
-      }
-    };
-
-    const getStatus = async () => {
-      try {
-        const response = await fetch("/api/status", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        console.log(data);
-        setAvailableStatus(data);
-      } catch (error) {
-        console.error("Failed to get status:", error);
-      }
-    };
-    getStatus();
-    getUsers();
-  }, []);
+    dispatch(fetchUsers());
+    dispatch(fetchStatuses());
+  }, [dispatch]);
 
   return (
     <div className="">
@@ -82,7 +44,7 @@ export function AdminDashboard() {
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-4 text-sm font-medium">
                 <Link
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-900  transition-all hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:text-zinc-50"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-zinc-900 transition-all hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:text-zinc-50"
                   to="#"
                 >
                   <IconUsers className="h-4 w-4" />
@@ -111,30 +73,35 @@ export function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user, index) => (
+                  {users.map((user: User, index: number) => (
                     <TableRow key={index}>
-                      <Avatar className="w-[80px] h-9">
-                        <AvatarImage
-                          alt="User1"
-                          src="/placeholder-avatar.jpg"
-                        />
-                        <AvatarFallback>U{index + 1}</AvatarFallback>
-                      </Avatar>
+                      <TableCell>
+                        <Avatar className="w-[80px] h-9">
+                          <AvatarImage
+                            alt={`${user.name}'s avatar`}
+                            src="/placeholder-avatar.jpg"
+                          />
+                          <AvatarFallback>{user.name[0]}</AvatarFallback>
+                        </Avatar>
+                      </TableCell>
                       <TableCell>
                         <span className="font-medium">{user.name}</span>
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        {user.status.map((status) => (
-                          <Badge className="px-2 py-1 mx-1 rounded-full bg-green-500 text-white">
-                            {status}
+                        {user.status ? user.status.map((status: Status, statusIndex: number) => (
+                          <Badge key={statusIndex} className="px-2 py-1 mx-1 rounded-full bg-green-500 text-white">
+                            {String(status)}
                           </Badge>
-                        ))}
+                        )) : 'No status'}
                       </TableCell>
                       <TableCell>
                         <EditUser
-                          user={user}
-                          availableStatus={availableStatus}
+                          user={{
+                            name: user.name,
+                            email: user.email,
+                            status: [user.status.join(', ')]                          
+                          }}
                         />
                         <Button size="icon" variant="ghost">
                           <IconTrash className="w-4 h-4" />

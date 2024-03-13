@@ -1,38 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from "@/components/ui/input";
 import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { setProjectName, setDescription, createProject } from '@/app/slices/projectSlice';
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
 export function Project() {
-  const [projectName, setProjectName] = useState("");
-  const [description, setDescription] = useState("");
-  const email = useSelector((state: any) => state.auth.email);
+  const dispatch = useAppDispatch();
+  const { projectName, description, status, error } = useAppSelector((state) => state.project);
+  const email = useAppSelector((state) => state.auth.email) ?? '';
 
-  const createProject = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/project/create/${email}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: projectName,
-          description: description,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Project created:", data);
-    } catch (error) {
-      console.error("Failed to create project:", error);
-    } finally {
-      setProjectName("");
-      setDescription("");
-    }
+  const handleCreateProject = () => {
+    dispatch(createProject({ email, projectName, description }));
   };
 
   return (
@@ -47,23 +26,25 @@ export function Project() {
           <Input
             id="projectName"
             value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
+            onChange={(e) => dispatch(setProjectName(e.target.value))}
           />
           <Label htmlFor="description">Description</Label>
           <Input
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            />
+            onChange={(e) => dispatch(setDescription(e.target.value))}
+          />
         </div>
       </CardContent>
       <CardFooter>
         <Button
-          type="submit"
-          onClick={createProject}
+          type="button"
+          onClick={handleCreateProject}
+          disabled={status === 'loading'}
         >
-          Create Project
+          {status === 'loading' ? 'Creating...' : 'Create Project'}
         </Button>
+        {status === 'failed' && <p className="text-red-500">{error}</p>}
       </CardFooter>
     </Card>
   );
