@@ -1,11 +1,13 @@
-import { Link } from "react-router-dom"
+import { Link } from 'react-router-dom';
 
 export function NotFound() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
       <div className="container flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="mx-auto">
-          <h1 className="text-6xl font-bold text-gray-900 dark:text-white">404</h1>
+          <h1 className="text-6xl font-bold text-gray-900 dark:text-white">
+            404
+          </h1>
           <p className="text-xl mt-4 text-gray-600 dark:text-gray-300">
             Oops! The page you're looking for does not exist.
           </p>
@@ -18,5 +20,5 @@ export function NotFound() {
         </div>
       </div>
     </section>
-  )
+  );
 }

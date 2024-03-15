@@ -7,6 +7,12 @@ interface UserState {
   availableStatus: Status[];
   isLoading: boolean;
   error: string | null;
+  verificationStatus:
+    | 'PENDING'
+    | 'SUCCESS'
+    | 'ALREADY_VERIFIED'
+    | 'ERROR'
+    | null;
 }
 
 const initialState: UserState = {
@@ -14,25 +20,55 @@ const initialState: UserState = {
   availableStatus: [],
   isLoading: false,
   error: null,
+  verificationStatus: null
 };
 
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('fetching users');
-      const response = await fetch("/api/person", {
-        method: "GET",
-        credentials: "include",
+      const response = await fetch('http://localhost:8080/api/person', {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json'
+        }
       });
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
       console.log(data);
+      return data;
+    } catch (error: unknown) {
+      console.log('error', error);
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
+    }
+  }
+);
+
+export const verifyUser = createAsyncThunk(
+  'users/verifyUser',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/person/verify/${email}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to verify user');
+      }
+      const data = await response.json();
       return data;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -46,20 +82,26 @@ export const fetchUsers = createAsyncThunk(
 
 export const createUser = createAsyncThunk(
   'users/createUser',
-  async ({ name, email }: { name: string; email: string; }, { rejectWithValue }) => {
+  async (
+    { name, email }: { name: string; email: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await fetch("/api/person/createUnverified", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          status: [],
-        }),
-      });
+      const response = await fetch(
+        'http://localhost:8080/api/person/createUnverified',
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            status: []
+          })
+        }
+      );
       if (!response.ok) {
         throw new Error('Failed to create user');
       }
@@ -80,12 +122,12 @@ export const fetchStatuses = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       console.log('fetching statuses');
-      const response = await fetch("/api/status", {
-        method: "GET",
-        credentials: "include",
+      const response = await fetch('http://localhost:8080/api/status', {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json'
+        }
       });
       if (!response.ok) {
         throw new Error('Failed to fetch statuses');
@@ -104,19 +146,25 @@ export const fetchStatuses = createAsyncThunk(
 
 export const editUser = createAsyncThunk(
   'users/editUser',
-  async ({ email, name, status }: { email: string; name: string; status: string[] }, { rejectWithValue }) => {
+  async (
+    { email, name, status }: { email: string; name: string; status: string[] },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await fetch(`/api/person/${email}`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          status: status,
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/person/${email}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            status: status
+          })
+        }
+      );
       if (!response.ok) {
         throw new Error('Failed to edit user');
       }
@@ -135,11 +183,10 @@ export const editUser = createAsyncThunk(
 const userSlice = createSlice({
   name: 'users',
   initialState,
-  reducers: {
-  },
-  extraReducers: (builder) => {
+  reducers: {},
+  extraReducers: builder => {
     builder
-      .addCase(fetchUsers.pending, (state) => {
+      .addCase(fetchUsers.pending, state => {
         state.isLoading = true;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
@@ -151,7 +198,7 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      .addCase(fetchStatuses.pending, (state) => {
+      .addCase(fetchStatuses.pending, state => {
         state.isLoading = true;
       })
       .addCase(fetchStatuses.fulfilled, (state, action) => {
@@ -163,12 +210,14 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      .addCase(editUser.pending, (state) => {
+      .addCase(editUser.pending, state => {
         state.isLoading = true;
       })
       .addCase(editUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.users.findIndex(user => user.email === action.payload.email);
+        const index = state.users.findIndex(
+          user => user.email === action.payload.email
+        );
         if (index !== -1) {
           state.users[index] = action.payload;
         }
@@ -178,7 +227,7 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      .addCase(createUser.pending, (state) => {
+      .addCase(createUser.pending, state => {
         state.isLoading = true;
       })
       .addCase(createUser.fulfilled, (state, action) => {
@@ -189,8 +238,17 @@ const userSlice = createSlice({
       .addCase(createUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-      })      
-  },
+      })
+      .addCase(verifyUser.pending, state => {
+        state.verificationStatus = 'PENDING';
+      })
+      .addCase(verifyUser.fulfilled, (state, action) => {
+        state.verificationStatus = action.payload.status;
+      })
+      .addCase(verifyUser.rejected, state => {
+        state.verificationStatus = 'ERROR';
+      });
+  }
 });
 
 export default userSlice.reducer;

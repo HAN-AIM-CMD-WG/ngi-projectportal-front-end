@@ -15,12 +15,15 @@ const initialState: AuthState = {
   isLoading: false,
   authChecking: true,
   error: null,
-  isLoggedIn: false,
+  isLoggedIn: false
 };
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async (credentials: { email: string, password: string }, { rejectWithValue }) => {
+  async (
+    credentials: { email: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
       const { email, password } = credentials;
 
@@ -31,9 +34,9 @@ export const loginUser = createAsyncThunk(
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: params.toString(),
+        body: params.toString()
       });
 
       if (!response.ok) {
@@ -59,9 +62,9 @@ export const loginWithGoogle = createAsyncThunk(
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ token: googleToken }),
+        body: JSON.stringify({ token: googleToken })
       });
 
       if (!response.ok) {
@@ -86,7 +89,7 @@ export const logoutUser = createAsyncThunk(
     try {
       const response = await fetch('/api/logout', {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include'
       });
       if (response.ok) {
         return true;
@@ -110,7 +113,7 @@ export const checkAuthentication = createAsyncThunk(
     try {
       const response = await fetch('/api/authentication', {
         method: 'GET',
-        credentials: 'include',
+        credentials: 'include'
       });
       if (response.ok) {
         const data = await response.json();
@@ -137,15 +140,15 @@ const authSlice = createSlice({
       state.email = action.payload;
       state.authChecking = false;
     },
-    setSessionInactive: (state) => {
+    setSessionInactive: state => {
       state.isLoggedIn = false;
       state.email = null;
       state.authChecking = false;
-    },
+    }
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(loginUser.pending, (state) => {
+      .addCase(loginUser.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -162,10 +165,10 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.authChecking = false;
       })
-      .addCase(logoutUser.pending, (state) => {
+      .addCase(logoutUser.pending, state => {
         state.isLoading = true;
       })
-      .addCase(logoutUser.fulfilled, (state) => {
+      .addCase(logoutUser.fulfilled, state => {
         state.isLoggedIn = false;
         state.email = null;
         state.isLoading = false;
@@ -178,7 +181,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.authChecking = false;
       })
-      .addCase(checkAuthentication.pending, (state) => {
+      .addCase(checkAuthentication.pending, state => {
         state.isLoading = true;
         state.authChecking = true;
       })
@@ -197,7 +200,7 @@ const authSlice = createSlice({
         state.email = null;
         state.roles = [];
       })
-      .addCase(loginWithGoogle.pending, (state) => {
+      .addCase(loginWithGoogle.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
@@ -214,7 +217,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.authChecking = false;
       });
-  },
+  }
 });
 
 export const { setSessionActive, setSessionInactive } = authSlice.actions;

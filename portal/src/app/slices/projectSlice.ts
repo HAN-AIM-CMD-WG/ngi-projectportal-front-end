@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 interface Projects {
-    title: string;
-    description: string;
+  title: string;
+  description: string;
 }
 
 interface ProjectState {
@@ -16,81 +16,94 @@ interface ProjectState {
 }
 
 const initialState: ProjectState = {
-    projectName: '',
-    description: '',
-    email: '',
-    status: 'idle',
-    projects: [],
-    fetchStatus: 'idle',
-    error: undefined,
+  projectName: '',
+  description: '',
+  email: '',
+  status: 'idle',
+  projects: [],
+  fetchStatus: 'idle',
+  error: undefined
 };
 
 export const createProject = createAsyncThunk(
   'project/createProject',
-  async ({ email, projectName, description }: { email: string; projectName: string; description: string; }, { rejectWithValue }) => {
+  async (
+    {
+      email,
+      projectName,
+      description
+    }: { email: string; projectName: string; description: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/project/create/${email}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: projectName,
-          description: description,
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/project/create/${email}`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: projectName,
+            description: description
+          })
+        }
+      );
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       return data;
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            return rejectWithValue(error.message);
-        } else {
-            return rejectWithValue(error as string);
-        }
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
     }
   }
 );
 
 export const fetchProjects = createAsyncThunk(
-    'project/fetchProjects',
-    async (email: string, { rejectWithValue }) => {
-      try {
-        const response = await fetch(`http://localhost:8080/api/project/${email}`, {
+  'project/fetchProjects',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/project/${email}`,
+        {
           method: 'GET',
           credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!response.ok) throw new Error('Failed to fetch projects');
-        const projects = await response.json();
-        return projects;
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-            return rejectWithValue(error.message);
-        } else {
-            return rejectWithValue(error as string);
+            'Content-Type': 'application/json'
+          }
         }
+      );
+      if (!response.ok) throw new Error('Failed to fetch projects');
+      const projects = await response.json();
+      return projects;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
       }
     }
-  );
+  }
+);
 
 const projectSlice = createSlice({
   name: 'project',
   initialState,
   reducers: {
     setProjectName: (state, action) => {
-        state.projectName = action.payload;
+      state.projectName = action.payload;
     },
     setDescription: (state, action) => {
-        state.description = action.payload;
-    },
+      state.description = action.payload;
+    }
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(createProject.pending, (state) => {
+      .addCase(createProject.pending, state => {
         state.status = 'loading';
       })
       .addCase(createProject.fulfilled, (state, action) => {
@@ -103,7 +116,7 @@ const projectSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       })
-      .addCase(fetchProjects.pending, (state) => {
+      .addCase(fetchProjects.pending, state => {
         state.fetchStatus = 'loading';
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
@@ -114,7 +127,7 @@ const projectSlice = createSlice({
         state.fetchStatus = 'failed';
         state.error = action.payload as string;
       });
-  },
+  }
 });
 
 export const { setProjectName, setDescription } = projectSlice.actions;

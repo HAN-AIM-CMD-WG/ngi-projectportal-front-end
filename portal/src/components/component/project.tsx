@@ -1,14 +1,27 @@
-import { Input } from "@/components/ui/input";
-import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { setProjectName, setDescription, createProject } from '@/app/slices/projectSlice';
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { Input } from '@/components/ui/input';
+import {
+  CardTitle,
+  CardDescription,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  Card
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import {
+  setProjectName,
+  setDescription,
+  createProject
+} from '@/app/slices/projectSlice';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
 export function Project() {
   const dispatch = useAppDispatch();
-  const { projectName, description, status, error } = useAppSelector((state) => state.project);
-  const email = useAppSelector((state) => state.auth.email) ?? '';
+  const { projectName, description, status, error } = useAppSelector(
+    state => state.project
+  );
+  const email = useAppSelector(state => state.auth.email) ?? '';
 
   const handleCreateProject = () => {
     dispatch(createProject({ email, projectName, description }));
@@ -18,7 +31,9 @@ export function Project() {
     <Card>
       <CardHeader>
         <CardTitle>Create a New Project</CardTitle>
-        <CardDescription>Fill out the form below to start a new project.</CardDescription>
+        <CardDescription>
+          Fill out the form below to start a new project.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="space-y-1">
@@ -26,13 +41,13 @@ export function Project() {
           <Input
             id="projectName"
             value={projectName}
-            onChange={(e) => dispatch(setProjectName(e.target.value))}
+            onChange={e => dispatch(setProjectName(e.target.value))}
           />
           <Label htmlFor="description">Description</Label>
           <Input
             id="description"
             value={description}
-            onChange={(e) => dispatch(setDescription(e.target.value))}
+            onChange={e => dispatch(setDescription(e.target.value))}
           />
         </div>
       </CardContent>

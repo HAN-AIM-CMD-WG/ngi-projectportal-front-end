@@ -7,21 +7,21 @@ import {
   TableHeader,
   TableCell,
   TableBody,
-  Table,
-} from "@/components/ui/table";
-import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Navbar } from "./navbar";
-import { Button } from "@/components/ui/button";
-import { AddUser } from "./add-user";
-import { EditUser } from "./edit-user";
+  Table
+} from '@/components/ui/table';
+import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Navbar } from './navbar';
+import { Button } from '@/components/ui/button';
+import { AddUser } from './add-user';
+import { EditUser } from './edit-user';
 import { User } from '@/app/types/user';
 import { Status } from '@/app/types/status';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
 export function AdminDashboard() {
   const dispatch = useAppDispatch();
-  const { users } = useAppSelector((state) => state.users);
+  const { users } = useAppSelector(state => state.users);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -89,18 +89,25 @@ export function AdminDashboard() {
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        {user.status ? user.status.map((status: Status, statusIndex: number) => (
-                          <Badge key={statusIndex} className="px-2 py-1 mx-1 rounded-full bg-green-500 text-white">
-                            {String(status)}
-                          </Badge>
-                        )) : 'No status'}
+                        {user.status
+                          ? user.status.map(
+                              (status: Status, statusIndex: number) => (
+                                <Badge
+                                  key={statusIndex}
+                                  className="px-2 py-1 mx-1 rounded-full bg-green-500 text-white"
+                                >
+                                  {String(status)}
+                                </Badge>
+                              )
+                            )
+                          : 'No status'}
                       </TableCell>
                       <TableCell>
                         <EditUser
                           user={{
                             name: user.name,
                             email: user.email,
-                            status: [user.status.join(', ')]                          
+                            status: [user.status.join(', ')]
                           }}
                         />
                         <Button size="icon" variant="ghost">

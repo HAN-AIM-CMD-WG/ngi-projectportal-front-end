@@ -6,9 +6,8 @@ export function Loading() {
         <p className="text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
     </div>
-  )
+  );
 }
-
 
 function MountainIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -26,5 +25,5 @@ function MountainIcon(props: React.SVGProps<SVGSVGElement>) {
     >
       <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
     </svg>
-  )
+  );
 }

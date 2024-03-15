@@ -6,24 +6,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { editUser } from "@/app/slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchStatuses } from "@/app/slices/userSlice";
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { editUser } from '@/app/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchStatuses } from '@/app/slices/userSlice';
 
-export function EditUser({user} : {user: any}) {
+export function EditUser({ user }: { user: any }) {
   const dispatch = useDispatch();
 
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -31,13 +31,16 @@ export function EditUser({user} : {user: any}) {
   const [email, setEmail] = useState(user.email);
   const [userStatus, setStatus] = useState<string[]>(user.status);
   const { availableStatus } = useSelector((state: any) => state.users);
-  const updatedUser = useSelector((state: { users: { users: any[]; }; }) => state.users.users.find((u: { email: string; }) => u.email === user.email));
-  const selectedStatusText = userStatus.length > 0 ? userStatus.join(', ') : 'Select status';
+  const updatedUser = useSelector((state: { users: { users: any[] } }) =>
+    state.users.users.find((u: { email: string }) => u.email === user.email)
+  );
+  const selectedStatusText =
+    userStatus.length > 0 ? userStatus.join(', ') : 'Select status';
 
   useEffect(() => {
-    if(!availableStatus) dispatch(fetchStatuses() as any);
+    if (!availableStatus) dispatch(fetchStatuses() as any);
   }, [availableStatus, dispatch]);
-  
+
   useEffect(() => {
     if (updatedUser) {
       setName(updatedUser.name);
@@ -45,7 +48,6 @@ export function EditUser({user} : {user: any}) {
       setStatus(updatedUser.status);
     }
   }, [updatedUser]);
-  
 
   const closeDialog = () => {
     setName(user.name);
@@ -56,12 +58,14 @@ export function EditUser({user} : {user: any}) {
 
   const updateUser = async () => {
     try {
-      dispatch(editUser({ email: user.email, name, status: userStatus }) as any);
+      dispatch(
+        editUser({ email: user.email, name, status: userStatus }) as any
+      );
       closeDialog();
     } catch (error) {
-      console.error("Failed to update user:", error);
+      console.error('Failed to update user:', error);
     }
-  }
+  };
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
@@ -81,13 +85,13 @@ export function EditUser({user} : {user: any}) {
           </Button>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="fullname">Full name</Label>
             <Input
               id="fullname"
               type="text"
               value={name}
-              onChange={(e) => {
+              onChange={e => {
                 setName(e.target.value);
               }}
             />
@@ -98,7 +102,7 @@ export function EditUser({user} : {user: any}) {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => {
+              onChange={e => {
                 setEmail(e.target.value);
               }}
             />
@@ -107,29 +111,40 @@ export function EditUser({user} : {user: any}) {
             <Label htmlFor="status">Status</Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline" className="text-left"> 
-                  <span className={userStatus.length > 0 ? "text-black" : "text-gray-400"}>
+                <Button size="sm" variant="outline" className="text-left">
+                  <span
+                    className={
+                      userStatus.length > 0 ? 'text-black' : 'text-gray-400'
+                    }
+                  >
                     {selectedStatusText}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-white shadow-md border border-gray-200">
-              {availableStatus?.map((dropdownStatus: any) => (
-                <DropdownMenuCheckboxItem
-                  key={dropdownStatus.name}
-                  checked={userStatus.includes(dropdownStatus.name)}
-                  onCheckedChange={() => {
-                    if (userStatus.includes(dropdownStatus.name)) {
-                      setStatus(prevStatus => prevStatus.filter(status => status !== dropdownStatus.name));
-                    } else {
-                      setStatus(prevStatus => [...prevStatus, dropdownStatus.name]);
-                    }
-                  }}
-                >
-                  <DropdownMenuLabel>{dropdownStatus.name}</DropdownMenuLabel>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
+                {availableStatus?.map((dropdownStatus: any) => (
+                  <DropdownMenuCheckboxItem
+                    key={dropdownStatus.name}
+                    checked={userStatus.includes(dropdownStatus.name)}
+                    onCheckedChange={() => {
+                      if (userStatus.includes(dropdownStatus.name)) {
+                        setStatus(prevStatus =>
+                          prevStatus.filter(
+                            status => status !== dropdownStatus.name
+                          )
+                        );
+                      } else {
+                        setStatus(prevStatus => [
+                          ...prevStatus,
+                          dropdownStatus.name
+                        ]);
+                      }
+                    }}
+                  >
+                    <DropdownMenuLabel>{dropdownStatus.name}</DropdownMenuLabel>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
