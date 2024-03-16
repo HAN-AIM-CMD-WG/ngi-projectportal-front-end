@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Project } from './project';
 import { Navbar } from './navbar';
 import { ProjectList } from './project-list.tsx';
+import { UserList } from './user-list.tsx';
 import { useAppSelector } from '@/app/hooks.ts';
 
 export function Landing() {
@@ -30,8 +31,13 @@ export function Landing() {
       {roles.includes('ROLE_OPDRACHTGEVER') && (
         <>
           <section className="w-full py-6">
-            <div className="container px-4 md:px-6">
-              <Project />
+            <div className="container flex flex-wrap md:flex-nowrap px-4 md:px-6">
+              <div className="w-full md:w-2/3 md:pr-4">
+                <Project />
+              </div>
+              <div className="w-full md:w-1/3 md:pl-4">
+                <UserList />
+              </div>
             </div>
           </section>
           <section className="w-full py-6">

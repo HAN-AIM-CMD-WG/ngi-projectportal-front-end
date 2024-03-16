@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-interface Projects {
+export interface Projects {
   title: string;
   description: string;
+  created: string;
 }
 
 interface ProjectState {
@@ -13,6 +14,7 @@ interface ProjectState {
   projects: Projects[];
   fetchStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | undefined;
+  titleExists: boolean;
 }
 
 const initialState: ProjectState = {
@@ -22,7 +24,8 @@ const initialState: ProjectState = {
   status: 'idle',
   projects: [],
   fetchStatus: 'idle',
-  error: undefined
+  error: undefined,
+  titleExists: false
 };
 
 export const createProject = createAsyncThunk(
@@ -90,6 +93,34 @@ export const fetchProjects = createAsyncThunk(
   }
 );
 
+export const fetchIfTitleExists = createAsyncThunk(
+  'project/fetchIfTitleExists',
+  async (title: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/project/exists/${title}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (!response.ok) throw new Error('Failed to fetch projects');
+      const exists = await response.json();
+      console.log(exists);
+      return exists;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: 'project',
   initialState,
@@ -125,6 +156,15 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.fetchStatus = 'failed';
+        state.error = action.payload as string;
+      })
+      .addCase(fetchIfTitleExists.pending, state => {
+        state.titleExists = false;
+      })
+      .addCase(fetchIfTitleExists.fulfilled, (state, action) => {
+        state.titleExists = action.payload;
+      })
+      .addCase(fetchIfTitleExists.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   }

@@ -1,51 +1,40 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { getParticipiants } from '@/app/slices/userSlice';
+import { useEffect } from 'react';
 
 export function UserList() {
+  const dispatch = useAppDispatch();
+  const { participants, isLoading, error } = useAppSelector(
+    state => state.users
+  );
+
+  useEffect(() => {
+    dispatch(getParticipiants());
+  }, [dispatch]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Our Users</CardTitle>
-        <CardDescription>
-          Meet the amazing people using our platform.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between space-x-2">
-          <Label>User 1</Label>
-          <Label>Email: user1@example.com</Label>
-          <div className="flex space-x-2">
-            <Button variant="outline">Status 1</Button>
-            <Button variant="outline">Status 2</Button>
-            <Button variant="outline">Status 3</Button>
+    <div className="grid w-full max-w-sm gap-4 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+      {participants.map((user, index) => (
+        <div key={index} className="flex items-center gap-4">
+          <img
+            alt="User"
+            className="rounded-full"
+            //src={user.image || '/placeholder.svg'}
+            style={{
+              aspectRatio: '40/40',
+              objectFit: 'cover'
+            }}
+            width="40"
+            height="40"
+          />
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold leading-none">{user.name}</h3>
           </div>
         </div>
-        <div className="flex items-center justify-between space-x-2">
-          <Label>User 2</Label>
-          <Label>Email: user2@example.com</Label>
-          <div className="flex space-x-2">
-            <Button variant="outline">Status 1</Button>
-            <Button variant="outline">Status 2</Button>
-            <Button variant="outline">Status 3</Button>
-          </div>
-        </div>
-        <div className="flex items-center justify-between space-x-2">
-          <Label>User 3</Label>
-          <Label>Email: user3@example.com</Label>
-          <div className="flex space-x-2">
-            <Button variant="outline">Status 1</Button>
-            <Button variant="outline">Status 2</Button>
-            <Button variant="outline">Status 3</Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }

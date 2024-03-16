@@ -13,6 +13,7 @@ interface UserState {
     | 'ALREADY_VERIFIED'
     | 'ERROR'
     | null;
+  participants: User[];
 }
 
 const initialState: UserState = {
@@ -20,7 +21,8 @@ const initialState: UserState = {
   availableStatus: [],
   isLoading: false,
   error: null,
-  verificationStatus: null
+  verificationStatus: null,
+  participants: []
 };
 
 export const fetchUsers = createAsyncThunk(
@@ -180,6 +182,35 @@ export const editUser = createAsyncThunk(
   }
 );
 
+export const getParticipiants = createAsyncThunk(
+  'users/getDeelnemers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        'http://localhost:8080/api/person/deelnemers',
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch deelnemers');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue(error as string);
+      }
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'users',
   initialState,
@@ -247,6 +278,18 @@ const userSlice = createSlice({
       })
       .addCase(verifyUser.rejected, state => {
         state.verificationStatus = 'ERROR';
+      })
+      .addCase(getParticipiants.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(getParticipiants.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.participants = action.payload;
+        state.error = null;
+      })
+      .addCase(getParticipiants.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   }
 });

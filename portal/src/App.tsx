@@ -19,12 +19,10 @@ const App = () => {
   const authChecking = useAppSelector(state => state.auth.authChecking);
 
   useEffect(() => {
-    console.log('App.tsx: useEffect: checkAuthentication');
     dispatch(checkAuthentication());
   }, [dispatch]);
 
   function AuthRouteWrapper({ children }: { children: ReactNode }) {
-    console.log('AuthRouteWrapper: userRoles:', userRoles);
     if (authChecking) {
       return <Loading />;
     }

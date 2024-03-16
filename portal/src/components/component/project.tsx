@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'; // Make sure useEffect is imported
 import { Input } from '@/components/ui/input';
 import {
   CardTitle,
@@ -12,19 +13,28 @@ import { Button } from '@/components/ui/button';
 import {
   setProjectName,
   setDescription,
-  createProject
+  createProject,
+  fetchIfTitleExists // Import the async thunk
 } from '@/app/slices/projectSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
 export function Project() {
   const dispatch = useAppDispatch();
-  const { projectName, description, status, error } = useAppSelector(
-    state => state.project
-  );
+  const { projectName, description, status, error, titleExists } =
+    useAppSelector(state => state.project);
   const email = useAppSelector(state => state.auth.email) ?? '';
 
+  useEffect(() => {
+    if (projectName.trim()) {
+      // Check that projectName is not just whitespace
+      dispatch(fetchIfTitleExists(projectName));
+    }
+  }, [dispatch, projectName]);
+
   const handleCreateProject = () => {
-    dispatch(createProject({ email, projectName, description }));
+    if (!titleExists) {
+      dispatch(createProject({ email, projectName, description }));
+    }
   };
 
   return (
@@ -42,7 +52,13 @@ export function Project() {
             id="projectName"
             value={projectName}
             onChange={e => dispatch(setProjectName(e.target.value))}
+            className={titleExists ? 'border-red-500' : ''}
           />
+          {titleExists && (
+            <div className="text-red-500 text-sm">
+              Project title already exists.
+            </div>
+          )}
           <Label htmlFor="description">Description</Label>
           <Input
             id="description"
@@ -55,7 +71,7 @@ export function Project() {
         <Button
           type="button"
           onClick={handleCreateProject}
-          disabled={status === 'loading'}
+          disabled={status === 'loading' || titleExists}
         >
           {status === 'loading' ? 'Creating...' : 'Create Project'}
         </Button>

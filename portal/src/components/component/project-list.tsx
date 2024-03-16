@@ -2,11 +2,7 @@ import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { useEffect } from 'react';
 import { fetchProjects } from '@/app/slices/projectSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-
-interface Project {
-  title: string;
-  description: string;
-}
+import { Projects } from '@/app/slices/projectSlice';
 
 export function ProjectList() {
   const dispatch = useAppDispatch();
@@ -17,6 +13,7 @@ export function ProjectList() {
 
   useEffect(() => {
     if (email) dispatch(fetchProjects(email));
+    console.log(projects);
   }, [dispatch, email]);
 
   if (fetchStatus === 'loading') {
@@ -43,13 +40,16 @@ export function ProjectList() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: Project, index: number) => (
+          {projects.map((project: Projects, index: number) => (
             <Card key={index}>
               <CardHeader>
                 <CardTitle>{project.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm/relaxed">{project.description}</p>
+                <p className="text-xs/relaxed text-gray-400">
+                  Created: {project.created}
+                </p>
               </CardContent>
             </Card>
           ))}
