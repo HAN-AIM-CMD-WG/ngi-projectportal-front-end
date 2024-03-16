@@ -76,10 +76,10 @@ export function AdminDashboard() {
                   {users.map((user: User, index: number) => (
                     <TableRow key={index}>
                       <TableCell>
-                        <Avatar className="w-[80px] h-9">
+                        <Avatar className="w-[40px] h-9">
                           <AvatarImage
                             alt={`${user.name}'s avatar`}
-                            src="/placeholder-avatar.jpg"
+                            src={user.pictureUrl || '/placeholder.svg'}
                           />
                           <AvatarFallback>{user.name[0]}</AvatarFallback>
                         </Avatar>

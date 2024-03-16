@@ -22,7 +22,7 @@ export function UserList() {
           <img
             alt="User"
             className="rounded-full"
-            //src={user.image || '/placeholder.svg'}
+            src={user.pictureUrl || '/placeholder.svg'}
             style={{
               aspectRatio: '40/40',
               objectFit: 'cover'
