@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // Make sure useEffect is imported
+import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   CardTitle,
@@ -14,7 +14,7 @@ import {
   setProjectName,
   setDescription,
   createProject,
-  fetchIfTitleExists // Import the async thunk
+  fetchIfTitleExists
 } from '@/app/slices/projectSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
@@ -26,7 +26,6 @@ export function Project() {
 
   useEffect(() => {
     if (projectName.trim()) {
-      // Check that projectName is not just whitespace
       dispatch(fetchIfTitleExists(projectName));
     }
   }, [dispatch, projectName]);

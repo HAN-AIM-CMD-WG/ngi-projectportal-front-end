@@ -109,7 +109,6 @@ export const fetchIfTitleExists = createAsyncThunk(
       );
       if (!response.ok) throw new Error('Failed to fetch projects');
       const exists = await response.json();
-      console.log(exists);
       return exists;
     } catch (error: unknown) {
       if (error instanceof Error) {
